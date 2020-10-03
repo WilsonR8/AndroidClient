@@ -19,7 +19,10 @@ import java.net.UnknownHostException;
 
 public class MainActivity extends AppCompatActivity {
 
-private BufferedWriter writer;
+
+    private Socket socket;
+    private BufferedReader reader;
+    private BufferedWriter writer;
     private EditText usertxt,passwordtxt;
     private Button signinbtn;
 
@@ -28,42 +31,57 @@ private BufferedWriter writer;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        usertxt= findViewById(R.id.usertxt);
-        passwordtxt=findViewById(R.id.passwordtxt);
-        signinbtn=findViewById(R.id.signinbtn);
+        usertxt = findViewById(R.id.usertxt);
+        passwordtxt = findViewById(R.id.passwordtxt);
+        signinbtn = findViewById(R.id.signinbtn);
 
-        new Thread(
-                ()->{
-                    try {
-                        //2.enviar solicitud de conexion
-                        Socket socket = new Socket("192.168.1.33", 5000);
-                        //3.Cliente y server conect
+        Init();
 
-                        InputStream is = socket.getInputStream();
-                        InputStreamReader isr = new InputStreamReader(is);
-                        BufferedReader reader = new BufferedReader(isr);
-
-                        OutputStream os =socket.getOutputStream();
-                        OutputStreamWriter osw = new OutputStreamWriter(os);
-                        BufferedWriter writer = new BufferedWriter(osw);
-
-                        while(true) {
-                            System.out.println("perate pue..");
-                            String line=reader.readLine();
-                            System.out.println("Recibido...");
-                            System.out.println("Recibido:"+line);
-                        }
-
-                    } catch (UnknownHostException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
+        signinbtn.setOnClickListener(
+                (v) -> {
+                    String x = usertxt.getText().toString();
+                    String y = passwordtxt.getText().toString();
+                    sendMessage(x + ":"+y);
                 }
-        ).start();
+        );
     }
+
+
+
+      public void Init(){
+          new Thread(
+                    ()->{
+                        try {
+                            //2.enviar solicitud de conexion
+                            socket = new Socket("192.168.1.33", 5000);
+                            //3.Cliente y server conect
+
+                            InputStream is = socket.getInputStream();
+                            InputStreamReader isr = new InputStreamReader(is);
+                            reader = new BufferedReader(isr);
+
+                            OutputStream os =socket.getOutputStream();
+                            OutputStreamWriter osw = new OutputStreamWriter(os);
+                            writer = new BufferedWriter(osw);
+
+                            while(true) {
+                                System.out.println("perate pue..");
+                                String line=reader.readLine();
+                                System.out.println("Recibido...");
+                                System.out.println("Recibido:"+line);
+                            }
+
+                        } catch (UnknownHostException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                    }
+            ).start();
+        }
+
 
     public void sendMessage(String msg){
         new Thread(
